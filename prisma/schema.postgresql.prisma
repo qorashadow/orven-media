@@ -1,0 +1,508 @@
+// Prisma Schema for Orven Media
+// SQLite for development, PostgreSQL for production
+// Switch by changing DATABASE_URL in .env
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── AUTH & USERS ───────────────────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  emailVerified   DateTime?
+  username        String    @unique
+  password        String?
+  name            String?
+  avatar          String?
+  banner          String?
+  bio             String?
+  role            String    @default("USER") // USER, ADMIN, MODERATOR
+  isPublic        Boolean   @default(true)
+  hideHistory     Boolean   @default(false)
+  nsfwFilter      Boolean   @default(true)
+  language        String    @default("en")
+  cardSize        String    @default("medium")
+  autoplay        Boolean   @default(true)
+  autoNext        Boolean   @default(true)
+  skipIntro       Boolean   @default(false)
+  defaultSubLang  String    @default("en")
+  defaultQuality  String    @default("auto")
+  banned          Boolean   @default(false)
+  banReason       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  watchHistory  WatchHistory[]
+  watchlist     WatchlistEntry[]
+  favorites     Favorite[]
+  ratings       Rating[]
+  reviews       Review[]
+  comments      Comment[]
+  commentLikes  CommentLike[]
+  notifications Notification[]
+  reports       Report[]
+  requests      AnimeRequest[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+}
+
+// ─── ANIME/DONGHUA ──────────────────────────────────────────
+
+model Anime {
+  id              String   @id @default(cuid())
+  title           String
+  titleEnglish    String?
+  titleNative     String?
+  titleRomaji     String?
+  slug            String   @unique
+  synopsis        String?
+  poster          String?
+  banner          String?
+  trailer         String?  // YouTube URL
+  type            String   @default("TV") // TV, Movie, OVA, ONA, Special
+  category        String   @default("ANIME") // ANIME, DONGHUA
+  status          String   @default("UPCOMING") // AIRING, COMPLETED, UPCOMING, HIATUS
+  season          String?  // WINTER, SPRING, SUMMER, FALL
+  year            Int?
+  totalEpisodes   Int?
+  duration        Int?     // minutes per episode
+  ageRating       String?  // G, PG, PG13, R, R17, R18
+  averageScore    Float?
+  popularity      Int      @default(0)
+  favorites       Int      @default(0)
+  trending        Int      @default(0)
+  views           Int      @default(0)
+  anilistId       Int?     @unique
+  malId           Int?
+  isNSFW          Boolean  @default(false)
+  isSpotlight     Boolean  @default(false)
+  spotlightOrder  Int?
+  featured        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  genres         AnimeGenre[]
+  studios        AnimeStudio[]
+  episodes       Episode[]
+  characters     AnimeCharacter[]
+  relations      AnimeRelation[]   @relation("AnimeSource")
+  relatedTo      AnimeRelation[]   @relation("AnimeTarget")
+  watchHistory   WatchHistory[]
+  watchlist      WatchlistEntry[]
+  favoritedBy    Favorite[]
+  ratings        Rating[]
+  reviews        Review[]
+  comments       Comment[]
+  schedules      Schedule[]
+  notifications  Notification[]
+  recommendations RecommendationSource[] @relation("RecommendationSource")
+  recommendedBy   RecommendationSource[] @relation("RecommendationTarget")
+
+  @@index([category])
+  @@index([status])
+  @@index([type])
+  @@index([year])
+  @@index([averageScore])
+  @@index([popularity])
+  @@index([trending])
+  @@index([views])
+  @@index([slug])
+}
+
+model Genre {
+  id    String @id @default(cuid())
+  name  String @unique
+  slug  String @unique
+  anime AnimeGenre[]
+}
+
+model AnimeGenre {
+  animeId String
+  genreId String
+  anime   Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  genre   Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([animeId, genreId])
+}
+
+model Studio {
+  id    String @id @default(cuid())
+  name  String @unique
+  slug  String @unique
+  anime AnimeStudio[]
+}
+
+model AnimeStudio {
+  animeId  String
+  studioId String
+  anime    Anime  @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  studio   Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@id([animeId, studioId])
+}
+
+model Character {
+  id       String @id @default(cuid())
+  name     String
+  nameNative String?
+  image    String?
+  anime    AnimeCharacter[]
+}
+
+model AnimeCharacter {
+  animeId     String
+  characterId String
+  role        String @default("SUPPORTING") // MAIN, SUPPORTING, BACKGROUND
+  anime       Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@id([animeId, characterId])
+}
+
+model AnimeRelation {
+  id         String @id @default(cuid())
+  sourceId   String
+  targetId   String
+  relationType String // SEQUEL, PREQUEL, SIDE_STORY, PARENT, ALTERNATIVE, SPIN_OFF, SUMMARY, OTHER
+  source     Anime  @relation("AnimeSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  target     Anime  @relation("AnimeTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId])
+}
+
+model RecommendationSource {
+  id         String @id @default(cuid())
+  sourceId   String
+  targetId   String
+  source     Anime  @relation("RecommendationSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  target     Anime  @relation("RecommendationTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId])
+}
+
+// ─── EPISODES ───────────────────────────────────────────────
+
+model Episode {
+  id          String   @id @default(cuid())
+  animeId     String
+  number      Int
+  title       String?
+  thumbnail   String?
+  duration    Int?     // seconds
+  videoUrl    String?  // MP4 or M3U8 URL
+  videoType   String   @default("mp4") // mp4, hls
+  introStart  Int?     // seconds
+  introEnd    Int?     // seconds
+  outroStart  Int?     // seconds
+  filler      Boolean  @default(false)
+  recap       Boolean  @default(false)
+  aired       DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  anime       Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  subtitles   Subtitle[]
+  servers     VideoServer[]
+  watchHistory WatchHistory[]
+  comments    Comment[]
+
+  @@unique([animeId, number])
+  @@index([animeId])
+}
+
+model Subtitle {
+  id         String  @id @default(cuid())
+  episodeId  String
+  language   String
+  label      String
+  url        String
+  isDefault  Boolean @default(false)
+  episode    Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([episodeId])
+}
+
+model VideoServer {
+  id        String  @id @default(cuid())
+  episodeId String
+  name      String
+  url       String
+  type      String  @default("mp4") // mp4, hls, embed
+  quality   String  @default("auto")
+  language  String  @default("sub") // sub, dub
+  isDefault Boolean @default(false)
+  episode   Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([episodeId])
+}
+
+// ─── USER INTERACTIONS ──────────────────────────────────────
+
+model WatchHistory {
+  id         String   @id @default(cuid())
+  userId     String
+  animeId    String
+  episodeId  String
+  progress   Int      @default(0)  // seconds watched
+  duration   Int      @default(0)  // total seconds
+  completed  Boolean  @default(false)
+  watchedAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime   Anime   @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, episodeId])
+  @@index([userId])
+  @@index([animeId])
+}
+
+model WatchlistEntry {
+  id      String @id @default(cuid())
+  userId  String
+  animeId String
+  status  String @default("PLAN_TO_WATCH") // WATCHING, PLAN_TO_WATCH, COMPLETED, ON_HOLD, DROPPED
+  episodesWatched Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
+  @@index([userId])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  animeId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
+}
+
+model Rating {
+  id      String @id @default(cuid())
+  userId  String
+  animeId String
+  score   Int    // 1-10
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  animeId   String
+  title     String
+  content   String
+  score     Int      // 1-10
+  helpful   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
+}
+
+// ─── COMMENTS ───────────────────────────────────────────────
+
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  animeId   String?
+  episodeId String?
+  parentId  String?
+  content   String
+  isSpoiler Boolean  @default(false)
+  isEdited  Boolean  @default(false)
+  isHidden  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime    Anime?     @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  episode  Episode?   @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  parent   Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  Comment[]  @relation("CommentReplies")
+  likes    CommentLike[]
+  reports  Report[]
+
+  @@index([animeId])
+  @@index([episodeId])
+  @@index([parentId])
+}
+
+model CommentLike {
+  id        String @id @default(cuid())
+  userId    String
+  commentId String
+  isLike    Boolean // true = like, false = dislike
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+}
+
+// ─── NOTIFICATIONS ──────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // NEW_EPISODE, COMMENT_REPLY, SYSTEM, ANNOUNCEMENT
+  title     String
+  message   String
+  link      String?
+  animeId   String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime Anime? @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── SCHEDULE ───────────────────────────────────────────────
+
+model Schedule {
+  id          String   @id @default(cuid())
+  animeId     String
+  episodeNumber Int
+  airingAt    DateTime
+  anime       Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@index([airingAt])
+}
+
+// ─── REPORTS & REQUESTS ─────────────────────────────────────
+
+model Report {
+  id        String   @id @default(cuid())
+  userId    String
+  commentId String?
+  type      String   // BROKEN_VIDEO, COMMENT, OTHER
+  reason    String
+  details   String?
+  status    String   @default("PENDING") // PENDING, REVIEWED, RESOLVED
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+}
+
+model AnimeRequest {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  details   String?
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── SITE MANAGEMENT ────────────────────────────────────────
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  type      String   @default("INFO") // INFO, WARNING, EVENT
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+}
+
+model SiteSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  target    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model News {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String
+  image     String?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

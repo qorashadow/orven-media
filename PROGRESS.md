@@ -200,3 +200,15 @@ Standart Foydalanuvchi:
 - [x] **Yakuniy Tekshiruv**:
   - `npx tsc --noEmit` muvaffaqiyatli o'tdi (0 xato).
   - Vaqtinchalik test fayli o'chirildi.
+
+---
+
+### 14-bosqich: Neon PostgreSQL & Vercel Tayyorgarligi (Phase 1) [YAKUNLANGAN]
+- [x] **SQLite Sxema Zaxirasi**: `prisma/schema.sqlite.prisma` to'liq zaxira fayli yaratildi. Mavjud `prisma/dev.db` bazasiga ziyon yetkazilmagan.
+- [x] **PostgreSQL Sxemasi**: `prisma/schema.postgresql.prisma` tayyorlandi (`provider = "postgresql"`, `url = env("DATABASE_URL")`, `directUrl = env("DIRECT_URL")`). Neon PgBouncer connection pooling va direct migration ulanishlari to'liq qo'llab-quvvatlanadi.
+- [x] **To'liq Ma'lumotlar Eksporti**: `scripts/export-sqlite-data.mjs` yaratildi va ishga tushirildi. `prisma/dev.db` dagi barcha 55 ta anime, 165 ta epizod, 20 ta janr, 180 ta personaj va foydalanuvchilar `prisma/sqlite-export.json` snapshot fayliga muvaffaqiyatli saqlandi.
+- [x] **Neon Importer Skripti**: `scripts/import-to-postgres.ts` yaratildi. Neon PostgreSQL ulangandan so'ng barcha CUID va munosabatlarni saqlagan holda ma'lumotlarni 1 buyruq bilan import qilish imkoniyati yaratildi (`npm run prisma:import-to-postgres`).
+- [x] **Sxema Almashtirish Utilitasi**: `scripts/switch-db.mjs` orqali xohlagan paytda SQLite yoki PostgreSQL rejimiga xavfsiz o'tish imkoni berildi (`npm run prisma:use-postgres`, `npm run prisma:use-sqlite`).
+- [x] **Build Skripti**: `package.json` dagi build buyrug'i `"prisma generate && next build"` ga yangilandi (Vercel serverless Linux muhiti uchun zarur).
+- [x] **Muhit O'zgaruvchilari**: `.env.example` faylida Neon va Vercel uchun zarur barcha parametrlar (`DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `NEXTAUTH_URL`) hujjatlashtirildi.
+- [x] **TypeScript Tekshiruvi**: `npx tsc --noEmit` 0 ta xato bilan o'tdi.

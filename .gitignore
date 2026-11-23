@@ -40,4 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-prisma/dev.db
+prisma/dev.db*
+prisma/*.db*
+prisma/sqlite-export.json
+prisma/*-export.json
+/uploads

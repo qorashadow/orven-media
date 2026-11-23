@@ -4,12 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:use-sqlite": "node scripts/switch-db.mjs sqlite",
+    "prisma:use-postgres": "node scripts/switch-db.mjs postgres",
+    "prisma:export-sqlite": "node scripts/export-sqlite-data.mjs",
+    "prisma:import-to-postgres": "tsx scripts/import-to-postgres.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
