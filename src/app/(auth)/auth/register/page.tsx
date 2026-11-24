@@ -207,28 +207,28 @@ export default function RegisterPage() {
   // Step 2: Verification Screen
   if (step === 'verify') {
     return (
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3.5 sm:gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-[#a0a0b0]/15 text-[#a0a0b0] flex items-center justify-center rounded-[1px] border border-[#a0a0b0]/30 shrink-0">
-            <ShieldCheck size={20} />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#a0a0b0]/15 text-[#a0a0b0] flex items-center justify-center rounded-[1px] border border-[#a0a0b0]/30 shrink-0">
+            <ShieldCheck size={18} />
           </div>
           <div>
-            <h1 className="text-xl font-bold font-heading text-[#d9d9de]">{t('auth.verification_title')}</h1>
-            <p className="text-xs text-[#8b8b94] mt-0.5">
+            <h1 className="text-lg sm:text-xl font-bold font-heading text-[#d9d9de]">{t('auth.verification_title')}</h1>
+            <p className="text-[11px] text-[#8b8b94] mt-0.5">
               {t('auth.verification_subtitle', { email })}
             </p>
           </div>
         </div>
 
         {errorMsg && (
-          <div className="p-3 bg-[#c43c3c]/10 border border-[#c43c3c]/30 text-xs text-[#c43c3c] rounded-[1px]">
+          <div className="p-2 sm:p-2.5 bg-[#c43c3c]/10 border border-[#c43c3c]/30 text-xs text-[#c43c3c] rounded-[1px]">
             {errorMsg}
           </div>
         )}
 
-        <form onSubmit={handleVerify} className="flex flex-col gap-4">
+        <form onSubmit={handleVerify} className="flex flex-col gap-3">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-[#8b8b94] mb-1.5">
+            <label className="block text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[#8b8b94] mb-1">
               {t('auth.enter_code')}
             </label>
             <input
@@ -239,23 +239,24 @@ export default function RegisterPage() {
               value={verifyCode}
               onChange={(e) => setVerifyCode(e.target.value.replace(/[^0-9]/g, ''))}
               placeholder="000000"
-              className="w-full text-center text-2xl font-mono font-bold tracking-[12px] bg-[#17171b] border border-[#26262c] focus:border-[#a0a0b0] focus:outline-none rounded-[1px] py-3 text-[#d9d9de]"
+              className="w-full text-center text-xl sm:text-2xl font-mono font-bold tracking-[8px] sm:tracking-[10px] bg-[#17171b] border border-[#26262c] focus:border-[#a0a0b0] focus:outline-none rounded-[1px] py-2 sm:py-2.5 text-[#d9d9de]"
             />
           </div>
 
           <Button
             type="submit"
             variant="primary"
-            size="md"
+            size="sm"
             loading={verifyLoading}
             fullWidth
             clipCorner
+            className="h-8.5 sm:h-9 text-xs sm:text-sm font-semibold"
           >
             {t('auth.verify_button')}
           </Button>
         </form>
 
-        <div className="flex items-center justify-between pt-2 border-t border-[#26262c] text-xs font-mono">
+        <div className="flex items-center justify-between pt-1.5 border-t border-[#26262c] text-xs font-mono">
           <button
             type="button"
             onClick={handleResend}
@@ -266,7 +267,7 @@ export default function RegisterPage() {
                 : 'text-[#56565e] cursor-not-allowed'
             }`}
           >
-            <RefreshCw size={13} className={!canResend ? 'animate-spin' : ''} />
+            <RefreshCw size={12} className={!canResend ? 'animate-spin' : ''} />
             {canResend ? t('auth.resend_code') : t('auth.resend_in', { seconds: resendCooldown })}
           </button>
 
@@ -284,64 +285,71 @@ export default function RegisterPage() {
 
   // Step 1: Registration Form
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3 sm:gap-3.5">
       <div>
-        <h1 className="text-xl font-bold font-heading text-[#d9d9de]">{t('auth.register_title')}</h1>
-        <p className="text-xs text-[#8b8b94] mt-1">
+        <h1 className="text-lg sm:text-xl font-bold font-heading text-[#d9d9de]">{t('auth.register_title')}</h1>
+        <p className="text-[11px] text-[#8b8b94] mt-0.5">
           {t('auth.register_subtitle')}
         </p>
       </div>
 
       {errorMsg && (
-        <div className="p-3 bg-[#c43c3c]/10 border border-[#c43c3c]/30 text-xs text-[#c43c3c] rounded-[1px]">
+        <div className="p-2 sm:p-2.5 bg-[#c43c3c]/10 border border-[#c43c3c]/30 text-xs text-[#c43c3c] rounded-[1px]">
           {errorMsg}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <Input
           label={t('auth.username')}
           type="text"
           required
+          compact
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="e.g. shadow_hunter"
-          icon={<UserIcon size={15} />}
+          icon={<UserIcon size={14} />}
         />
 
         <Input
           label={t('auth.email')}
           type="email"
           required
+          compact
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="your@email.com"
-          icon={<Mail size={15} />}
+          icon={<Mail size={14} />}
         />
 
-        <Input
-          label={t('auth.password')}
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          icon={<Lock size={15} />}
-        />
+        {/* Password & Confirm Password side-by-side on sm screens */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <Input
+            label={t('auth.password')}
+            type="password"
+            required
+            compact
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            icon={<Lock size={14} />}
+          />
+
+          <Input
+            label={t('auth.confirm_password')}
+            type="password"
+            required
+            compact
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••"
+            icon={<Lock size={14} />}
+          />
+        </div>
 
         {password && <PasswordStrength password={password} />}
 
-        <Input
-          label={t('auth.confirm_password')}
-          type="password"
-          required
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="••••••••"
-          icon={<Lock size={15} />}
-        />
-
-        <label className="flex items-start gap-2 text-[11px] text-[#8b8b94] cursor-pointer pt-1">
+        <label className="flex items-start gap-1.5 text-[10px] sm:text-[11px] text-[#8b8b94] cursor-pointer pt-0.5">
           <input
             type="checkbox"
             checked={acceptTerms}
@@ -363,22 +371,22 @@ export default function RegisterPage() {
         <Button
           type="submit"
           variant="primary"
-          size="md"
+          size="sm"
           loading={loading}
           fullWidth
           clipCorner
-          icon={<UserPlus size={15} />}
-          className="mt-1"
+          icon={<UserPlus size={14} />}
+          className="mt-0.5 h-8.5 sm:h-9 text-xs sm:text-sm font-semibold"
         >
           {t('auth.register_button')}
         </Button>
       </form>
 
       {/* OAuth Buttons */}
-      <OAuthButtons callbackUrl="/" />
+      <OAuthButtons callbackUrl="/" compact />
 
       {/* Login link */}
-      <div className="text-center text-xs text-[#8b8b94] pt-2 border-t border-[#26262c]">
+      <div className="text-center text-xs text-[#8b8b94] pt-1.5 border-t border-[#26262c]">
         {t('auth.have_account')}{' '}
         <Link href="/auth/login" className="text-[#a0a0b0] font-semibold hover:underline">
           {t('auth.sign_in_button')}

@@ -73,29 +73,30 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3 sm:gap-3.5">
       <div>
-        <h1 className="text-xl font-bold font-heading text-[#d9d9de]">{t('auth.login_title')}</h1>
-        <p className="text-xs text-[#8b8b94] mt-1">
+        <h1 className="text-lg sm:text-xl font-bold font-heading text-[#d9d9de]">{t('auth.login_title')}</h1>
+        <p className="text-[11px] text-[#8b8b94] mt-0.5">
           {t('auth.login_subtitle')}
         </p>
       </div>
 
       {errorMsg && (
-        <div className="p-3 bg-[#c43c3c]/10 border border-[#c43c3c]/30 text-xs text-[#c43c3c] rounded-[1px]">
+        <div className="p-2 sm:p-2.5 bg-[#c43c3c]/10 border border-[#c43c3c]/30 text-xs text-[#c43c3c] rounded-[1px]">
           {errorMsg}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
         <Input
           label={`${t('auth.email')} / ${t('auth.username')}`}
           type="text"
           required
+          compact
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
           placeholder="email or username"
-          icon={<Mail size={15} />}
+          icon={<Mail size={14} />}
         />
 
         <div className="flex flex-col gap-1">
@@ -103,13 +104,14 @@ export default function LoginPage() {
             label={t('auth.password')}
             type="password"
             required
+            compact
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            icon={<Lock size={15} />}
+            icon={<Lock size={14} />}
           />
-          <div className="flex items-center justify-between mt-1">
-            <label className="flex items-center gap-1.5 text-[11px] font-mono text-[#8b8b94] cursor-pointer">
+          <div className="flex items-center justify-between mt-0.5">
+            <label className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono text-[#8b8b94] cursor-pointer">
               <input
                 type="checkbox"
                 checked={rememberMe}
@@ -121,7 +123,7 @@ export default function LoginPage() {
 
             <Link
               href="/auth/forgot-password"
-              className="text-[11px] font-mono text-[#8b8b94] hover:text-[#a0a0b0] transition-colors"
+              className="text-[10px] sm:text-[11px] font-mono text-[#8b8b94] hover:text-[#a0a0b0] transition-colors"
             >
               {t('auth.forgot_password')}
             </Link>
@@ -131,22 +133,22 @@ export default function LoginPage() {
         <Button
           type="submit"
           variant="primary"
-          size="md"
+          size="sm"
           loading={loading}
           fullWidth
           clipCorner
-          icon={<LogIn size={15} />}
-          className="mt-1"
+          icon={<LogIn size={14} />}
+          className="mt-0.5 h-8.5 sm:h-9 text-xs sm:text-sm font-semibold"
         >
           {t('auth.sign_in_button')}
         </Button>
       </form>
 
       {/* OAuth Buttons */}
-      <OAuthButtons callbackUrl={callbackUrl} />
+      <OAuthButtons callbackUrl={callbackUrl} compact />
 
       {/* Register link */}
-      <div className="text-center text-xs text-[#8b8b94] pt-2 border-t border-[#26262c]">
+      <div className="text-center text-xs text-[#8b8b94] pt-1.5 border-t border-[#26262c]">
         {t('auth.no_account')}{' '}
         <Link href="/auth/register" className="text-[#a0a0b0] font-semibold hover:underline">
           {t('auth.register_button')}

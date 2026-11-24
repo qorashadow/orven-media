@@ -1,7 +1,5 @@
 import nodemailer from 'nodemailer'
-import { getBaseUrl } from './utils'
-
-export type EmailLocale = 'en' | 'uz' | 'ru'
+import { getBaseUrl } from '@/lib/utils'
 
 interface SendEmailOptions {
   to: string
@@ -10,18 +8,16 @@ interface SendEmailOptions {
   text: string
 }
 
-let transporter: nodemailer.Transporter | null = null
+export type EmailLocale = 'en' | 'uz' | 'ru'
 
 function getTransporter(): nodemailer.Transporter | null {
-  if (transporter) return transporter
-
   const host = process.env.SMTP_HOST
-  const port = parseInt(process.env.SMTP_PORT || '587', 10)
+  const port = parseInt(process.env.SMTP_PORT || '465')
   const user = process.env.SMTP_USER
   const pass = process.env.SMTP_PASS
 
   if (host && user && pass) {
-    transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       host,
       port,
       secure: port === 465,
@@ -133,8 +129,8 @@ function baseTemplate({
       padding: 0 !important;
       height: 100% !important;
       width: 100% !important;
-      background-color: #09090b !important;
-      color: #e4e4ed !important;
+      background-color: #0b0b0d !important;
+      color: #d9d9de !important;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
       -webkit-font-smoothing: antialiased !important;
       -ms-text-size-adjust: 100% !important;
@@ -151,7 +147,7 @@ function baseTemplate({
       text-decoration: none;
     }
     a {
-      color: #a0a0b8;
+      color: #a0a0b0;
       text-decoration: underline;
     }
     /* Mobile responsive adjustments */
@@ -164,18 +160,18 @@ function baseTemplate({
         border-right: none !important;
       }
       .mobile-padding {
-        padding: 24px 20px !important;
+        padding: 24px 18px !important;
       }
       .header-padding {
-        padding: 20px 20px !important;
+        padding: 18px 18px !important;
       }
       .footer-padding {
-        padding: 20px 20px !important;
+        padding: 18px 18px !important;
       }
       .code-display {
-        font-size: 28px !important;
-        letter-spacing: 6px !important;
-        text-indent: 6px !important;
+        font-size: 26px !important;
+        letter-spacing: 8px !important;
+        text-indent: 8px !important;
       }
     }
   </style>
@@ -189,40 +185,40 @@ function baseTemplate({
   </noscript>
   <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; background-color: #09090b; color: #e4e4ed;">
+<body style="margin: 0; padding: 0; background-color: #0b0b0d; color: #d9d9de;">
   <!-- Preheader text hidden from visual view -->
-  <div style="display: none; font-size: 1px; color: #09090b; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+  <div style="display: none; font-size: 1px; color: #0b0b0d; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
     ${title} • Orven Media Security Gateway
   </div>
 
-  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #09090b; width: 100%;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0b0b0d; width: 100%;">
     <tr>
       <td align="center" style="padding: 32px 12px;">
         <!-- Card Container -->
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-container" style="max-width: 580px; background-color: #111116; border: 1px solid #23232c; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);">
-          <!-- Top Accent Line -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-container" style="max-width: 540px; background-color: #111114; border: 1px solid #26262c; border-radius: 4px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+          <!-- Top Accent Line (Calm, subtle brand red) -->
           <tr>
-            <td height="3" style="background: linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%); line-height: 3px; font-size: 3px;">&nbsp;</td>
+            <td height="2" style="background-color: #c43c3c; line-height: 2px; font-size: 2px;">&nbsp;</td>
           </tr>
 
           <!-- Header -->
           <tr>
-            <td class="header-padding" style="padding: 24px 32px; background-color: #15151c; border-bottom: 1px solid #23232c;">
+            <td class="header-padding" style="padding: 20px 28px; background-color: #111114; border-bottom: 1px solid #26262c;">
               <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="left" valign="middle">
                     <a href="${appUrl}" target="_blank" style="text-decoration: none; display: inline-flex; align-items: center;">
-                      <!-- OM Badge -->
-                      <span style="display: inline-block; background-color: #ffffff; color: #0b0b0d; font-weight: 900; font-size: 11px; padding: 4px 7px; letter-spacing: 1.5px; border-radius: 3px; margin-right: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-transform: uppercase;">
+                      <!-- OM Badge matching website design -->
+                      <span style="display: inline-block; background-color: #a0a0b0; color: #0b0b0d; font-weight: 800; font-size: 11px; padding: 4px 7px; letter-spacing: 1px; border-radius: 2px; margin-right: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-transform: uppercase;">
                         OM
                       </span>
-                      <span style="font-weight: 800; font-size: 17px; letter-spacing: 1.5px; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                        ORVEN <span style="color: #8b8b9c; font-weight: 300;">MEDIA</span>
+                      <span style="font-weight: 800; font-size: 16px; letter-spacing: 1px; color: #d9d9de; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                        ORVEN <span style="color: #8b8b94; font-weight: 300; letter-spacing: 2px;">MEDIA</span>
                       </span>
                     </a>
                   </td>
-                  <td align="right" valign="middle" style="display: none;">
-                    <span style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #727282; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                  <td align="right" valign="middle">
+                    <span style="font-size: 9px; font-weight: 600; letter-spacing: 1px; color: #56565e; text-transform: uppercase; font-family: ui-monospace, 'SF Mono', monospace;">
                       ${badgeText}
                     </span>
                   </td>
@@ -233,8 +229,8 @@ function baseTemplate({
 
           <!-- Content Body -->
           <tr>
-            <td class="mobile-padding" style="padding: 36px 32px;">
-              <h1 style="margin: 0 0 16px 0; color: #ffffff; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.35; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <td class="mobile-padding" style="padding: 30px 28px;">
+              <h1 style="margin: 0 0 14px 0; color: #ffffff; font-size: 19px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.35; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                 ${title}
               </h1>
               ${bodyContent}
@@ -243,18 +239,18 @@ function baseTemplate({
 
           <!-- Footer -->
           <tr>
-            <td class="footer-padding" style="padding: 24px 32px; background-color: #0d0d11; border-top: 1px solid #1c1c24;">
+            <td class="footer-padding" style="padding: 20px 28px; background-color: #0b0b0d; border-top: 1px solid #1f1f25;">
               <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                  <td style="color: #666675; font-size: 12px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                  <td style="color: #56565e; font-size: 11px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                     ${footerNote}
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #1a1a22;">
-                      <a href="${appUrl}" target="_blank" style="color: #9292a4; text-decoration: none; font-weight: 600;">${displayDomain}</a>
-                      <span style="color: #3e3e4c; margin: 0 8px;">•</span>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #1a1a20;">
+                      <a href="${appUrl}" target="_blank" style="color: #8b8b94; text-decoration: none; font-weight: 600;">${displayDomain}</a>
+                      <span style="color: #3e3e48; margin: 0 8px;">•</span>
                       <span>Ultra HD Anime & Donghua Streaming</span>
                     </div>
-                    <div style="margin-top: 6px; font-size: 11px; color: #4e4e5b;">
-                      &copy; ${currentYear} Orven Media Inc. All rights reserved.
+                    <div style="margin-top: 4px; font-size: 10px; color: #464650;">
+                      &copy; ${currentYear} Orven Media. All rights reserved.
                     </div>
                   </td>
                 </tr>
@@ -271,23 +267,23 @@ function baseTemplate({
 }
 
 /**
- * Bulletproof action button compatible with Outlook, Apple Mail, and Gmail.
+ * Bulletproof action button matching site's primary button style.
  */
 function renderActionButton(url: string, label: string) {
   return `
-    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 28px 0; width: 100%;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 24px 0; width: 100%;">
       <tr>
         <td align="center">
           <!--[if mso]>
-          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${url}" style="height:44px;v-text-anchor:middle;width:240px;" arcsize="10%" strokecolor="#ffffff" fillcolor="#ffffff">
+          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${url}" style="height:38px;v-text-anchor:middle;width:240px;" arcsize="5%" strokecolor="#a0a0b0" fillcolor="#a0a0b0">
             <w:anchorlock/>
-            <center style="color:#09090b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;font-weight:bold;letter-spacing:0.5px;">
+            <center style="color:#0b0b0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;font-weight:bold;letter-spacing:0.5px;">
               ${label}
             </center>
           </v:roundrect>
           <![endif]-->
           <!--[if !mso]><!-->
-          <a href="${url}" target="_blank" style="display: inline-block; background-color: #ffffff; color: #09090b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 800; letter-spacing: 0.5px; padding: 13px 36px; text-decoration: none; border-radius: 4px; box-shadow: 0 4px 14px rgba(255, 255, 255, 0.12); text-align: center; text-transform: uppercase;">
+          <a href="${url}" target="_blank" style="display: inline-block; background-color: #a0a0b0; color: #0b0b0d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; padding: 11px 32px; text-decoration: none; border-radius: 2px; text-align: center; text-transform: uppercase;">
             ${label}
           </a>
           <!--<![endif]-->
@@ -302,13 +298,13 @@ function renderActionButton(url: string, label: string) {
  */
 function renderCodeBox(code: string, subnote: string = 'Valid for 10 minutes • Single-use only') {
   return `
-    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 20px 0; width: 100%;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 18px 0; width: 100%;">
       <tr>
-        <td align="center" style="background-color: #171720; border: 1px solid #2d2d3a; border-radius: 6px; padding: 22px 16px;">
-          <div class="code-display" style="font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', Menlo, Consolas, monospace; font-size: 34px; font-weight: 800; letter-spacing: 10px; color: #ffffff; text-align: center; text-indent: 10px; line-height: 1;">
+        <td align="center" style="background-color: #17171b; border: 1px solid #26262c; border-radius: 2px; padding: 18px 16px;">
+          <div class="code-display" style="font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', Menlo, Consolas, monospace; font-size: 32px; font-weight: 800; letter-spacing: 10px; color: #ffffff; text-align: center; text-indent: 10px; line-height: 1;">
             ${code}
           </div>
-          <div style="margin-top: 10px; font-size: 10px; font-weight: 700; color: #78788c; letter-spacing: 1.2px; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+          <div style="margin-top: 8px; font-size: 10px; font-weight: 600; color: #8b8b94; letter-spacing: 1px; text-transform: uppercase; font-family: ui-monospace, 'SF Mono', monospace;">
             ${subnote}
           </div>
         </td>
@@ -318,16 +314,16 @@ function renderCodeBox(code: string, subnote: string = 'Valid for 10 minutes •
 }
 
 /**
- * Styled security/warning alert box.
+ * Styled security/warning alert box matching dark theme.
  */
 function renderSecurityCallout(text: string, isAlert = false) {
-  const borderColor = isAlert ? '#ef4444' : '#3f3f50'
-  const textColor = isAlert ? '#fca5a5' : '#888898'
+  const borderColor = isAlert ? '#c43c3c' : '#26262c'
+  const textColor = isAlert ? '#f07171' : '#8b8b94'
   return `
-    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 22px 0; width: 100%;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 18px 0; width: 100%;">
       <tr>
-        <td style="border-left: 3px solid ${borderColor}; background-color: #15151c; padding: 12px 16px; border-radius: 0 4px 4px 0;">
-          <p style="margin: 0; font-size: 12px; line-height: 1.5; color: ${textColor}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <td style="border-left: 2px solid ${borderColor}; background-color: #17171b; padding: 10px 14px; border-radius: 0 2px 2px 0;">
+          <p style="margin: 0; font-size: 11px; line-height: 1.5; color: ${textColor}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
             ${text}
           </p>
         </td>
@@ -348,29 +344,29 @@ export async function sendVerificationEmail(
     en: {
       subject: 'Verify Your Email Address - Orven Media',
       title: 'Verify Your Email Address',
-      intro: 'Welcome to Orven Media. Enter this 6-digit confirmation code on the registration page or click the button below to instantly activate your account.',
-      btnText: 'Verify Account Now',
-      orCode: 'Or copy your 6-digit confirmation code:',
-      directLinkText: 'If the button does not work, open this direct verification link in your browser:',
-      security: 'If you did not request this account, you can safely ignore this email. No account will be activated without this verification step.',
+      badge: 'ACCOUNT ACTIVATION',
+      body: 'Thank you for registering with Orven Media. Please enter the following 6-digit verification code to confirm your email and activate your streaming account:',
+      expiry: 'This verification code expires in 10 minutes. If you did not create an account on Orven Media, you can safely ignore this transmission.',
+      btnText: 'Confirm Email Address',
+      orClick: 'Alternatively, you can instantly verify by clicking the button below:',
     },
     uz: {
-      subject: 'Elektron Pochtangizni Tasdiqlang - Orven Media',
-      title: 'Elektron Pochtangizni Tasdiqlang',
-      intro: 'Orven Media platformasiga xush kelibsiz. Akkauntingizni faollashtirish uchun ushbu 6 xonali tasdiqlash kodini kiriting yoki quyidagi tugmani bosing.',
-      btnText: 'Akkauntni Tasdiqlash',
-      orCode: 'Yoki 6 xonali tasdiqlash kodidan foydalaning:',
-      directLinkText: 'Agar tugma ishlamasa, brauzeringizda ushbu toʻgʻridan-toʻgʻri havolani oching:',
-      security: 'Agar siz roʻyxatdan oʻtmagan boʻlsangiz, ushbu xabarni eʼtiborsiz qoldirishingiz mumkin. Akkaunt tasdiqlanmasdan faollashtirilmaydi.',
+      subject: 'Email Manzilingizni Tasdiqlang - Orven Media',
+      title: 'Emailingizni Tasdiqlang',
+      badge: 'AKKAUNTNI FAOLLASHTIRISH',
+      body: 'Orven Media platformasida roʻyxatdan oʻtganingiz uchun tashakkur. Streaming akkauntingizni faollashtirish uchun quyidagi 6 xonali tasdiqlash kodini kiriting:',
+      expiry: 'Ushbu kod 10 daqiqa davomida amal qiladi. Agar siz ushbu hisobni yaratmagan boʻlsangiz, xabarga eʼtibor bermang.',
+      btnText: 'Emailni Tasdiqlash',
+      orClick: 'Yoki quyidagi tugmani bosish orqali bir zumda tasdiqlashingiz mumkin:',
     },
     ru: {
-      subject: 'Подтвердите Ваш Email - Orven Media',
-      title: 'Подтвердите Ваш Email',
-      intro: 'Добро пожаловать в Orven Media. Введите этот 6-значный проверочный код или нажмите кнопку ниже для мгновенной активации вашего аккаунта.',
-      btnText: 'Подтвердить Аккаунт',
-      orCode: 'Или используйте 6-значный проверочный код:',
-      directLinkText: 'Если кнопка не работает, откройте эту прямую ссылку в браузере:',
-      security: 'Если вы не регистрировались на нашем сервисе, просто проигнорируйте это письмо. Без подтверждения аккаунт активирован не будет.',
+      subject: 'Подтвердите адрес электронной почты - Orven Media',
+      title: 'Подтверждение почты',
+      badge: 'АКТИВАЦИЯ АККАУНТА',
+      body: 'Благодарим вас за регистрацию в Orven Media. Чтобы подтвердить ваш email и активировать аккаунт, введите следующий 6-значный проверочный код:',
+      expiry: 'Этот проверочный код действителен в течение 10 минут. Если вы не создавали аккаунт, просто проигнорируйте это письмо.',
+      btnText: 'Подтвердить Email',
+      orClick: 'Вы также можете мгновенно подтвердить почту, нажав кнопку ниже:',
     },
   }
 
@@ -378,76 +374,72 @@ export async function sendVerificationEmail(
 
   const html = baseTemplate({
     title: t.title,
-    badgeText: 'SECURITY VERIFICATION',
+    badgeText: t.badge,
     bodyContent: `
-      <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #a4a4b6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        ${t.intro}
+      <p style="margin: 0 0 16px 0; font-size: 13px; line-height: 1.6; color: #a0a0b0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        ${t.body}
+      </p>
+
+      ${renderCodeBox(code, '10 MINUTES VALIDITY • SINGLE-USE')}
+
+      <p style="margin: 16px 0 6px 0; font-size: 12px; color: #8b8b94; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        ${t.orClick}
       </p>
 
       ${renderActionButton(verifyUrl, t.btnText)}
 
-      <p style="margin: 24px 0 8px 0; text-align: center; font-size: 12px; font-weight: 600; color: #7a7a8c; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        ${t.orCode}
-      </p>
-
-      ${renderCodeBox(code, 'Expires in 10 minutes • One-time use')}
-
-      <p style="margin: 20px 0 4px 0; font-size: 11px; color: #666675; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        ${t.directLinkText}
-      </p>
-      <p style="margin: 0; font-size: 11px; word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;">
-        <a href="${verifyUrl}" target="_blank" style="color: #8c8ca8;">${verifyUrl}</a>
-      </p>
-
-      ${renderSecurityCallout(t.security)}
+      ${renderSecurityCallout(t.expiry, false)}
     `,
-    footerNote: 'Automated account security transmission from Orven Media Authentication Service.',
+    footerNote: 'This is an automated security dispatch from Orven Media Authentication Service.',
     appUrl,
   })
 
-  const text = `${t.title}\n\n${t.intro}\n\nVERIFICATION CODE: ${code}\n\nDIRECT LINK: ${verifyUrl}\n\n${t.security}\n\n---\nOrven Media Security Gateway\n${appUrl}`
+  const text = `${t.title}\n\n${t.body}\n\nVERIFICATION CODE: ${code}\n(Valid for 10 minutes)\n\nOr click here to verify directly:\n${verifyUrl}\n\n---\nOrven Media Security Team\n${appUrl}`
 
   return sendEmail({ to, subject: t.subject, html, text })
 }
 
 export async function sendPasswordResetEmail(
   to: string,
-  code: string,
+  tokenOrCode: string,
   locale: EmailLocale = 'en',
-  resetToken?: string
+  linkToken?: string
 ) {
   const appUrl = getBaseUrl()
-  const resetUrl = resetToken
-    ? `${appUrl}/auth/reset-password?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(to)}`
-    : `${appUrl}/auth/reset-password?email=${encodeURIComponent(to)}`
+  const isDigitCode = /^\d{6}$/.test(tokenOrCode)
+  const resetUrl = linkToken
+    ? `${appUrl}/auth/reset-password?email=${encodeURIComponent(to)}&token=${encodeURIComponent(linkToken)}`
+    : isDigitCode
+      ? `${appUrl}/auth/reset-password?email=${encodeURIComponent(to)}&code=${encodeURIComponent(tokenOrCode)}`
+      : `${appUrl}/auth/reset-password?token=${encodeURIComponent(tokenOrCode)}`
 
   const translations = {
     en: {
       subject: 'Reset Your Password - Orven Media',
-      title: 'Reset Your Password',
-      intro: 'A password reset was requested for your Orven Media account. Click the button below to choose a new password, or enter the 6-digit security code on the reset page.',
-      btnText: 'Reset Password',
-      orCode: 'Or enter this 6-digit authorization code:',
-      directLinkText: 'Direct password reset link:',
-      warning: 'Never share this code or link with anyone. If you did not request a password reset, change your account credentials immediately or contact support.',
+      title: 'Password Reset Request',
+      badge: 'SECURITY ALERT',
+      body: 'We received a request to reset your password for your Orven Media account. If you initiated this request, please use the 6-digit security code below:',
+      alert: 'If you did not request a password reset, someone else may be attempting to access your account. Please change your credentials immediately or ignore this message.',
+      btnText: 'Reset My Password',
+      orClick: 'Or proceed directly via the secure link:',
     },
     uz: {
       subject: 'Parolingizni Tiklang - Orven Media',
-      title: 'Parolingizni Qayta Oʻrnatish',
-      intro: 'Orven Media akkauntingiz uchun parolni tiklash soʻrovi yuborildi. Yangi parol oʻrnatish uchun quyidagi tugmani bosing yoki 6 xonali tasdiqlash kodidan foydalaning.',
-      btnText: 'Parolni Tiklash',
-      orCode: 'Yoki 6 xonali tasdiqlash kodidan foydalaning:',
-      directLinkText: 'Toʻgʻridan-toʻgʻri parolni tiklash havolasi:',
-      warning: 'Ushbu kod va havolani hech kimga bermang. Agar parolni tiklashni soʻramagan boʻlsangiz, zudlik bilan profilingiz xavfsizligini tekshiring.',
+      title: 'Parolni Tiklash Soʻrovi',
+      badge: 'XAVFSIZLIK BILDIRISHNOMASI',
+      body: 'Orven Media akkauntingiz uchun parolni tiklash soʻrovi olindi. Agar ushbu soʻrovni siz yuborgan boʻlsangiz, quyidagi 6 xonali xavfsizlik kodidan foydalaning:',
+      alert: 'Agar siz ushbu soʻrovni yubormagan boʻlsangiz, boshqa kimdir akkauntingizga kirishga urinayotgan boʻlishi mumkin. Xavfsizligingiz uchun ushbu xatga eʼtibor bermang.',
+      btnText: 'Parolni Yangilash',
+      orClick: 'Yoki toʻgʻridan-toʻgʻri havola orqali oʻting:',
     },
     ru: {
-      subject: 'Сброс Пароля - Orven Media',
-      title: 'Восстановление Пароля',
-      intro: 'Для вашей учетной записи Orven Media был запрошен сброс пароля. Нажмите кнопку ниже для установки нового пароля или используйте 6-значный проверочный код.',
-      btnText: 'Сбросить Пароль',
-      orCode: 'Или введите 6-значный код на странице восстановления:',
-      directLinkText: 'Прямая ссылка для сброса пароля:',
-      warning: 'Никому не сообщайте этот код или ссылку. Если вы не запрашивали сброс пароля, немедленно проверьте безопасность учетной записи.',
+      subject: 'Сброс пароля - Orven Media',
+      title: 'Сброс пароля',
+      badge: 'БЕЗОПАСНОСТЬ',
+      body: 'Мы получили запрос на сброс пароля для вашей учетной записи Orven Media. Если это были вы, используйте следующий 6-значный код безопасности:',
+      alert: 'Если вы не запрашивали сброс пароля, возможно, кто-то пытается получить доступ к вашему аккаунту. Проигнорируйте это сообщение.',
+      btnText: 'Сбросить пароль',
+      orClick: 'Или перейдите по прямой ссылке:',
     },
   }
 
@@ -455,34 +447,27 @@ export async function sendPasswordResetEmail(
 
   const html = baseTemplate({
     title: t.title,
-    badgeText: 'SECURITY ALERT',
+    badgeText: t.badge,
     bodyContent: `
-      <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #a4a4b6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        ${t.intro}
+      <p style="margin: 0 0 16px 0; font-size: 13px; line-height: 1.6; color: #a0a0b0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        ${t.body}
+      </p>
+
+      ${renderCodeBox(tokenOrCode, 'EXPIRES IN 1 HOUR • CONFIDENTIAL')}
+
+      <p style="margin: 16px 0 6px 0; font-size: 12px; color: #8b8b94; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        ${t.orClick}
       </p>
 
       ${renderActionButton(resetUrl, t.btnText)}
 
-      <p style="margin: 24px 0 8px 0; text-align: center; font-size: 12px; font-weight: 600; color: #7a7a8c; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        ${t.orCode}
-      </p>
-
-      ${renderCodeBox(code, 'Expires in 10 minutes • Authorized request')}
-
-      <p style="margin: 20px 0 4px 0; font-size: 11px; color: #666675; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        ${t.directLinkText}
-      </p>
-      <p style="margin: 0; font-size: 11px; word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;">
-        <a href="${resetUrl}" target="_blank" style="color: #8c8ca8;">${resetUrl}</a>
-      </p>
-
-      ${renderSecurityCallout(t.warning, true)}
+      ${renderSecurityCallout(t.alert, true)}
     `,
-    footerNote: 'Automated security transmission from Orven Media Security Gateway.',
+    footerNote: 'If you need further help, please contact Orven Media Support.',
     appUrl,
   })
 
-  const text = `${t.title}\n\n${t.intro}\n\nRESET LINK: ${resetUrl}\n\nRESET CODE: ${code}\n\n${t.warning}\n\n---\nOrven Media Security Gateway\n${appUrl}`
+  const text = `${t.title}\n\n${t.body}\n\nSECURITY CODE: ${tokenOrCode}\n\nDirect Link:\n${resetUrl}\n\n${t.alert}\n\n---\nOrven Media Security\n${appUrl}`
 
   return sendEmail({ to, subject: t.subject, html, text })
 }
@@ -496,22 +481,25 @@ export async function sendEmailChangeCode(
 
   const translations = {
     en: {
-      subject: 'Confirm Email Address Change - Orven Media',
-      title: 'Confirm Your New Email Address',
-      intro: 'You requested to update your primary email address on Orven Media. Enter this 6-digit confirmation code in your account settings to verify ownership of this inbox.',
-      security: 'If this change was not requested by you, someone may have unauthorized access to your account. Please change your password immediately.',
+      subject: 'Confirm Your New Email Address - Orven Media',
+      title: 'Email Address Update',
+      badge: 'ACCOUNT SETTINGS',
+      body: 'You recently requested to update the email address linked to your Orven Media account. Use the confirmation code below to complete this update:',
+      security: 'If you did not make this request from your profile settings, please secure your account credentials immediately.',
     },
     uz: {
-      subject: 'Elektron Pochtani Oʻzgartirish - Orven Media',
-      title: 'Yangi Pochtani Tasdiqlash',
-      intro: 'Orven Media akkauntingiz elektron pochtasini oʻzgartirish soʻraldi. Ushbu pochtaning sizga tegishli ekanligini tasdiqlash uchun 6 xonali kodni kiriting.',
-      security: 'Agar buni siz soʻramagan boʻlsangiz, zudlik bilan profilingiz parolini yangilang va xavfsizligini taʼminlang.',
+      subject: 'Yangi Email Manzilingizni Tasdiqlang - Orven Media',
+      title: 'Email Manzilini Oʻzgartirish',
+      badge: 'SOZLAMALAR',
+      body: 'Yaqinda Orven Media akkauntingizga bogʻlangan email manzilini oʻzgartirishni soʻradingiz. Oʻzgarishni tasdiqlash uchun quyidagi koddan foydalaning:',
+      security: 'Agar ushbu soʻrovni siz yubormagan boʻlsangiz, zudlik bilan akkaunt xavfsizligingizni tekshiring.',
     },
     ru: {
-      subject: 'Смена Email Адреса - Orven Media',
-      title: 'Подтверждение Нового Email',
-      intro: 'Вы запросили смену адреса электронной почты на Orven Media. Введите этот 6-значный код в настройках профиля для подтверждения владения почтой.',
-      security: 'Если вы не запрашивали изменение, возможно, кто-то получил доступ к вашей учетной записи. Срочно смените пароль.',
+      subject: 'Подтвердите новый адрес электронной почты - Orven Media',
+      title: 'Обновление адреса почты',
+      badge: 'НАСТРОЙКИ АККАУНТА',
+      body: 'Вы запросили изменение адреса электронной почты в профиле Orven Media. Введите следующий код для завершения обновления:',
+      security: 'Если вы не инициировали это изменение, немедленно проверьте безопасность учетной записи.',
     },
   }
 
@@ -519,21 +507,21 @@ export async function sendEmailChangeCode(
 
   const html = baseTemplate({
     title: t.title,
-    badgeText: 'PROFILE UPDATE',
+    badgeText: t.badge,
     bodyContent: `
-      <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #a4a4b6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        ${t.intro}
+      <p style="margin: 0 0 16px 0; font-size: 13px; line-height: 1.6; color: #a0a0b0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        ${t.body}
       </p>
 
-      ${renderCodeBox(code, 'Expires in 10 minutes • Verification code')}
+      ${renderCodeBox(code, 'EXPIRES IN 15 MINUTES')}
 
-      ${renderSecurityCallout(t.security)}
+      ${renderSecurityCallout(t.security, true)}
     `,
-    footerNote: 'Automated profile security dispatch from Orven Media.',
+    footerNote: 'This message was generated following an email change request.',
     appUrl,
   })
 
-  const text = `${t.title}\n\n${t.intro}\n\nCONFIRMATION CODE: ${code}\n\n${t.security}\n\n---\nOrven Media Security Gateway\n${appUrl}`
+  const text = `${t.title}\n\n${t.body}\n\nCONFIRMATION CODE: ${code}\n\n${t.security}\n\n---\nOrven Media Security\n${appUrl}`
 
   return sendEmail({ to, subject: t.subject, html, text })
 }
@@ -585,17 +573,17 @@ export async function sendWelcomeEmail(
     title: t.title,
     badgeText: 'MEMBERSHIP CONFIRMED',
     bodyContent: `
-      <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #a4a4b6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+      <p style="margin: 0 0 18px 0; font-size: 13px; line-height: 1.6; color: #a0a0b0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
         ${t.body}
       </p>
 
       ${renderActionButton(streamUrl, t.btnText)}
 
-      <div style="margin: 28px 0; padding: 18px 20px; background-color: #16161e; border: 1px solid #23232e; border-radius: 6px;">
-        <div style="font-size: 12px; font-weight: 700; color: #ffffff; margin-bottom: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; letter-spacing: 0.5px; text-transform: uppercase;">
+      <div style="margin: 24px 0; padding: 16px 18px; background-color: #17171b; border: 1px solid #26262c; border-radius: 2px;">
+        <div style="font-size: 11px; font-weight: 700; color: #ffffff; margin-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; letter-spacing: 0.5px; text-transform: uppercase;">
           ${t.featuresIntro}
         </div>
-        <ul style="margin: 0; padding-left: 18px; color: #8e8ea2; font-size: 13px; line-height: 1.7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <ul style="margin: 0; padding-left: 18px; color: #8b8b94; font-size: 12px; line-height: 1.7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
           <li>${t.feature1}</li>
           <li>${t.feature2}</li>
           <li>${t.feature3}</li>

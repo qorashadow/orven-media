@@ -30,7 +30,7 @@ export const PasswordStrength: React.FC<PasswordStrengthProps> = ({ password = '
   const activeLevel = Math.min(strength, 4)
 
   return (
-    <div className={cn('flex flex-col gap-1 w-full', className)}>
+    <div className={cn('flex flex-col gap-0.5 w-full', className)}>
       <div className="flex gap-1 h-1">
         {[0, 1, 2, 3].map((step) => (
           <div
@@ -42,9 +42,10 @@ export const PasswordStrength: React.FC<PasswordStrengthProps> = ({ password = '
           />
         ))}
       </div>
-      <span className="text-[10px] font-mono text-[#8b8b94]">
-        Strength: <span className="text-[#d9d9de]">{labels[activeLevel]}</span>
-      </span>
+      <div className="flex justify-between items-center text-[9px] sm:text-[10px] font-mono text-[#8b8b94] leading-tight">
+        <span>Password strength:</span>
+        <span className="text-[#d9d9de] font-semibold">{labels[activeLevel]}</span>
+      </div>
     </div>
   )
 }
