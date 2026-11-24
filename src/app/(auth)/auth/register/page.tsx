@@ -104,12 +104,7 @@ export default function RegisterPage() {
         setErrorMsg(data.error || 'Failed to create account')
         error(data.error || 'Failed to create account')
       } else {
-        if (data.devCode) {
-          success(`Verification code dispatched! (Demo code: ${data.devCode})`)
-          setVerifyCode(data.devCode)
-        } else {
-          success('Verification code dispatched to your email!')
-        }
+        success(t('auth.verification_sent') || 'Verification code dispatched to your email!')
         setStep('verify')
         setResendCooldown(60)
       }
@@ -180,12 +175,7 @@ export default function RegisterPage() {
 
       const data = await res.json()
       if (res.ok) {
-        if (data.devCode) {
-          success(`Code resent! (Demo code: ${data.devCode})`)
-          setVerifyCode(data.devCode)
-        } else {
-          success(t('auth.code_resent') || 'Verification code resent!')
-        }
+        success(t('auth.code_resent') || 'Verification code resent!')
         setResendCooldown(60)
         setCanResend(false)
       } else {

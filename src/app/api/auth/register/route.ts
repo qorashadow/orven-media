@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import crypto from 'crypto'
 import bcryptjs from 'bcryptjs'
 import { db } from '@/lib/db'
 import { registerSchema } from '@/lib/validations'
@@ -101,8 +102,8 @@ export async function POST(req: Request) {
       },
     })
 
-    // Generate 6-digit confirmation code
-    const code = Math.floor(100000 + Math.random() * 900000).toString()
+    // Generate cryptographically secure 6-digit confirmation code
+    const code = crypto.randomInt(100000, 1000000).toString()
     const hashedCode = await bcryptjs.hash(code, 10)
 
     // Clean up old token if any
@@ -119,7 +120,7 @@ export async function POST(req: Request) {
       },
     })
 
-    // Dispatch verification email (logs code to terminal in dev mode)
+    // Dispatch real verification email via SMTP
     const mailResult = await sendVerificationEmail(normalizedEmail, code, locale)
     if (!mailResult.success) {
       console.error('[AUTH REGISTER] Failed to send verification email to', normalizedEmail, mailResult.error)
@@ -134,7 +135,9 @@ export async function POST(req: Request) {
 
       return NextResponse.json(
         {
-          error: mailResult.error || 'Failed to dispatch verification email. Please check your email address and try again.',
+          error:
+            mailResult.error ||
+            'Failed to dispatch verification email. Please check your email address and try again.',
         },
         { status: 500 }
       )
@@ -146,7 +149,6 @@ export async function POST(req: Request) {
         requireVerification: true,
         email: user.email,
         username: user.username,
-        devCode: mailResult.devMode ? code : undefined,
       },
       { status: 201 }
     )

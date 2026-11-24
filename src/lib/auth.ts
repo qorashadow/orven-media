@@ -20,19 +20,87 @@ if (!process.env.AUTH_SECRET) {
 if (!process.env.NEXTAUTH_SECRET) {
   process.env.NEXTAUTH_SECRET = resolvedSecret
 }
-if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
-  process.env.AUTH_URL = process.env.NEXTAUTH_URL
-}
-if (!process.env.NEXTAUTH_URL && process.env.AUTH_URL) {
-  process.env.NEXTAUTH_URL = process.env.AUTH_URL
-}
-if (!process.env.AUTH_URL && !process.env.NEXTAUTH_URL && process.env.NODE_ENV === 'production') {
-  process.env.AUTH_URL = 'https://orven-media.vercel.app'
-  process.env.NEXTAUTH_URL = 'https://orven-media.vercel.app'
+
+// In production or Vercel, guarantee canonical production domain
+if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+  if (!process.env.AUTH_URL || process.env.AUTH_URL.includes('localhost')) {
+    process.env.AUTH_URL =
+      process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes('localhost')
+        ? process.env.NEXT_PUBLIC_APP_URL
+        : 'https://orven-media.vercel.app'
+  }
+  if (!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.includes('localhost')) {
+    process.env.NEXTAUTH_URL = process.env.AUTH_URL
+  }
+} else {
+  if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
+    process.env.AUTH_URL = process.env.NEXTAUTH_URL
+  }
+  if (!process.env.NEXTAUTH_URL && process.env.AUTH_URL) {
+    process.env.NEXTAUTH_URL = process.env.AUTH_URL
+  }
 }
 
+// Custom Prisma Adapter to satisfy required schema fields (username, avatar mapping) for OAuth
+const basePrismaAdapter = PrismaAdapter(db)
+const customPrismaAdapter: typeof basePrismaAdapter = {
+  ...basePrismaAdapter,
+  async createUser(data: any) {
+    const email = (data.email || '').toLowerCase().trim()
+    const baseName = (data.name || email.split('@')[0] || 'user')
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9_-]/g, '')
+      .substring(0, 15)
+    const username = `${baseName || 'user'}_${Math.random().toString(36).substring(2, 7)}`
+
+    return db.user.create({
+      data: {
+        name: data.name || username,
+        email,
+        username,
+        avatar: data.image || null,
+        emailVerified: data.emailVerified || new Date(),
+        role: 'USER', // Newly registered OAuth users are always regular USERs
+      },
+    }) as any
+  },
+  async getUserByEmail(email: string) {
+    const user = await db.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+    })
+    if (!user) return null
+    return {
+      ...user,
+      image: user.avatar,
+    } as any
+  },
+  async getUserByAccount({ provider, providerAccountId }: { provider: string; providerAccountId: string }) {
+    const account = await db.account.findUnique({
+      where: {
+        provider_providerAccountId: {
+          provider,
+          providerAccountId,
+        },
+      },
+      include: { user: true },
+    })
+    if (!account?.user) return null
+    return {
+      ...account.user,
+      image: account.user.avatar,
+    } as any
+  },
+}
+
+const googleClientId = process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET
+const githubClientId = process.env.GITHUB_CLIENT_ID || process.env.AUTH_GITHUB_ID
+const githubClientSecret = process.env.GITHUB_CLIENT_SECRET || process.env.AUTH_GITHUB_SECRET
+const discordClientId = process.env.DISCORD_CLIENT_ID || process.env.AUTH_DISCORD_ID
+const discordClientSecret = process.env.DISCORD_CLIENT_SECRET || process.env.AUTH_DISCORD_SECRET
+
 export const authConfig: NextAuthConfig = {
-  adapter: PrismaAdapter(db),
+  adapter: customPrismaAdapter,
   secret: resolvedSecret,
   trustHost: true,
   session: {
@@ -97,29 +165,29 @@ export const authConfig: NextAuthConfig = {
         } as any
       },
     }),
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ...(googleClientId && googleClientSecret
       ? [
           Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            clientId: googleClientId,
+            clientSecret: googleClientSecret,
             allowDangerousEmailAccountLinking: true,
           }),
         ]
       : []),
-    ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+    ...(githubClientId && githubClientSecret
       ? [
           GitHub({
-            clientId: process.env.GITHUB_CLIENT_ID,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET,
+            clientId: githubClientId,
+            clientSecret: githubClientSecret,
             allowDangerousEmailAccountLinking: true,
           }),
         ]
       : []),
-    ...(process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET
+    ...(discordClientId && discordClientSecret
       ? [
           Discord({
-            clientId: process.env.DISCORD_CLIENT_ID,
-            clientSecret: process.env.DISCORD_CLIENT_SECRET,
+            clientId: discordClientId,
+            clientSecret: discordClientSecret,
             allowDangerousEmailAccountLinking: true,
           }),
         ]
@@ -179,40 +247,8 @@ export const authConfig: NextAuthConfig = {
     },
     async signIn({ user, account }) {
       if (account?.provider && account.provider !== 'credentials') {
-        const email = user.email?.toLowerCase()
+        const email = user.email?.toLowerCase().trim()
         if (!email) return false
-
-        const existingUser = await db.user.findUnique({
-          where: { email },
-        })
-
-        if (!existingUser) {
-          // Clean username generation for OAuth users
-          const baseName = (user.name || email.split('@')[0])
-            .toLowerCase()
-            .replace(/[^a-zA-Z0-9_-]/g, '')
-            .substring(0, 15)
-          const username = `${baseName || 'user'}_${Math.random().toString(36).substring(2, 6)}`
-
-          await db.user.create({
-            data: {
-              email,
-              emailVerified: new Date(), // OAuth emails are pre-verified
-              username,
-              name: user.name || username,
-              avatar: user.image,
-              role: 'USER', // Always regular USER by default
-            },
-          })
-        } else {
-          // If existing user, ensure email is verified
-          if (!existingUser.emailVerified) {
-            await db.user.update({
-              where: { id: existingUser.id },
-              data: { emailVerified: new Date() },
-            })
-          }
-        }
 
         const dbUser = await db.user.findUnique({
           where: { email },
@@ -220,6 +256,13 @@ export const authConfig: NextAuthConfig = {
 
         if (dbUser?.banned) {
           return false
+        }
+
+        if (dbUser && !dbUser.emailVerified) {
+          await db.user.update({
+            where: { id: dbUser.id },
+            data: { emailVerified: new Date() },
+          })
         }
       }
       return true

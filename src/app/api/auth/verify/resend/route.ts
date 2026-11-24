@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import crypto from 'crypto'
 import bcryptjs from 'bcryptjs'
 import { db } from '@/lib/db'
 import { sendVerificationEmail, type EmailLocale } from '@/lib/email'
@@ -48,11 +49,11 @@ export async function POST(req: Request) {
         }
       } catch {}
 
-      await db.verificationToken.delete({ where: { token: existing.token } }).catch(() => {})
+      await db.verificationToken.deleteMany({ where: { identifier } }).catch(() => {})
     }
 
-    // Generate new code
-    const code = Math.floor(100000 + Math.random() * 900000).toString()
+    // Generate cryptographically secure new code
+    const code = crypto.randomInt(100000, 1000000).toString()
     const hashedCode = await bcryptjs.hash(code, 10)
 
     await db.verificationToken.create({
@@ -76,7 +77,6 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: 'Verification code resent successfully',
-      devCode: mailResult.devMode ? code : undefined,
     })
   } catch (err) {
     console.error('Resend error:', err)

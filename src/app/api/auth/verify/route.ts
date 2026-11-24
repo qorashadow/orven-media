@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     })
 
     // Clean up verification token
-    await db.verificationToken.delete({ where: { token: record.token } }).catch(() => {})
+    await db.verificationToken.deleteMany({ where: { identifier } }).catch(() => {})
 
     // Send welcome email in user's language
     const emailLoc: EmailLocale = ['en', 'uz', 'ru'].includes(locale) ? locale : 'en'

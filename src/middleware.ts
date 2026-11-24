@@ -17,10 +17,26 @@ export async function middleware(request: NextRequest) {
     process.env.NEXTAUTH_SECRET ||
     'orven-media-production-auth-secret-key-fallback-32b'
 
-  const token = await getToken({
+  let token = await getToken({
     req: request,
     secret,
+    cookieName: '__Secure-authjs.session-token',
   })
+
+  if (!token) {
+    token = await getToken({
+      req: request,
+      secret,
+      cookieName: 'authjs.session-token',
+    })
+  }
+
+  if (!token) {
+    token = await getToken({
+      req: request,
+      secret,
+    })
+  }
 
   // Admin route protection: must be logged in AND role === 'ADMIN'
   if (pathname.startsWith('/admin')) {
