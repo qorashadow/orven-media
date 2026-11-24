@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import { getBaseUrl } from './utils'
 
 export type EmailLocale = 'en' | 'uz' | 'ru'
 
@@ -71,7 +72,8 @@ export async function sendEmail({
   }
 }
 
-function baseTemplate(title: string, bodyContent: string, footerNote: string) {
+function baseTemplate(title: string, bodyContent: string, footerNote: string, appUrl: string = getBaseUrl()) {
+  const displayDomain = appUrl.replace(/^https?:\/\//, '')
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -112,12 +114,14 @@ function baseTemplate(title: string, bodyContent: string, footerNote: string) {
       padding: 4px 6px;
       letter-spacing: 1px;
       margin-right: 10px;
+      text-decoration: none;
     }
     .brand-title {
       font-weight: 800;
       font-size: 16px;
       letter-spacing: 1.5px;
       color: #d9d9de;
+      text-decoration: none;
     }
     .brand-title span {
       color: #8b8b94;
@@ -146,7 +150,7 @@ function baseTemplate(title: string, bodyContent: string, footerNote: string) {
       border-radius: 2px;
       padding: 18px;
       text-align: center;
-      margin: 24px 0;
+      margin: 20px 0;
     }
     .code-digits {
       font-family: 'Courier New', Courier, monospace;
@@ -156,21 +160,38 @@ function baseTemplate(title: string, bodyContent: string, footerNote: string) {
       color: #d9d9de;
       text-indent: 10px;
     }
+    .btn-action {
+      background: #a0a0b0;
+      color: #0b0b0d !important;
+      padding: 12px 28px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      border-radius: 2px;
+      display: inline-block;
+    }
     .footer {
       padding: 20px 32px;
       background: #0b0b0d;
       border-top: 1px solid #17171b;
       color: #56565e;
       font-size: 11px;
-      line-height: 1.5;
+      line-height: 1.6;
+    }
+    .footer a {
+      color: #8b8b94;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <div class="wrapper">
     <div class="header">
-      <span class="logo-badge">OM</span>
-      <span class="brand-title">ORVEN <span>MEDIA</span></span>
+      <a href="${appUrl}" style="text-decoration: none; display: inline-flex; align-items: center;">
+        <span class="logo-badge">OM</span>
+        <span class="brand-title">ORVEN <span>MEDIA</span></span>
+      </a>
     </div>
     <div class="content">
       <h2>${title}</h2>
@@ -178,7 +199,11 @@ function baseTemplate(title: string, bodyContent: string, footerNote: string) {
     </div>
     <div class="footer">
       ${footerNote}
-      <br>&copy; ${new Date().getFullYear()} Orven Media. All rights reserved.
+      <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #1a1a20;">
+        <a href="${appUrl}">${displayDomain}</a>
+        <span style="color: #3a3a44; margin: 0 6px;">&bull;</span>
+        <span>&copy; ${new Date().getFullYear()} Orven Media. All rights reserved.</span>
+      </div>
     </div>
   </div>
 </body>
@@ -191,23 +216,35 @@ export async function sendVerificationEmail(
   code: string,
   locale: EmailLocale = 'en'
 ) {
+  const appUrl = getBaseUrl()
+  const verifyUrl = `${appUrl}/auth/register?email=${encodeURIComponent(to)}&code=${encodeURIComponent(code)}&step=verify`
+
   const translations = {
     en: {
       subject: 'Your Verification Code - Orven Media',
       title: 'Verify Your Email Address',
-      intro: 'Thank you for registering on Orven Media. Enter this 6-digit confirmation code to activate your account. Code expires in 10 minutes.',
+      intro: 'Thank you for registering on Orven Media. Enter this 6-digit confirmation code or click the button below to activate your account. Code expires in 10 minutes.',
+      btnText: 'VERIFY ACCOUNT NOW',
+      orCode: 'Or enter this 6-digit code on the registration page:',
+      directLinkText: 'Direct verification link:',
       security: 'If you did not request this account, you can safely disregard this email.',
     },
     uz: {
       subject: 'Tasdiqlash Kodi - Orven Media',
       title: 'Elektron Pochtangizni Tasdiqlang',
-      intro: 'Orven Media platformasiga xush kelibsiz. Akkauntingizni faollashtirish uchun ushbu 6 xonali tasdiqlash kodini kiriting. Kod 10 daqiqa amal qiladi.',
+      intro: 'Orven Media platformasiga xush kelibsiz. Akkauntingizni faollashtirish uchun ushbu 6 xonali tasdiqlash kodini kiriting yoki quyidagi tugmani bosing. Kod 10 daqiqa amal qiladi.',
+      btnText: 'AKKAUNTNI TASDIQLASH',
+      orCode: 'Yoki roʻyxatdan oʻtish sahifasida 6 xonali kodni kiriting:',
+      directLinkText: 'Toʻgʻridan-toʻgʻri tasdiqlash havolasi:',
       security: 'Agar siz roʻyxatdan oʻtmagan boʻlsangiz, ushbu xabarni eʼtiborsiz qoldirishingiz mumkin.',
     },
     ru: {
       subject: 'Код Подтверждения - Orven Media',
       title: 'Подтвердите Ваш Email',
-      intro: 'Благодарим за регистрацию на Orven Media. Введите этот 6-значный проверочный код для активации аккаунта. Код действителен в течение 10 минут.',
+      intro: 'Благодарим за регистрацию на Orven Media. Введите этот 6-значный проверочный код или нажмите кнопку ниже для активации аккаунта. Код действителен в течение 10 минут.',
+      btnText: 'ПОДТВЕРДИТЬ АККАУНТ',
+      orCode: 'Или введите 6-значный проверочный код на странице:',
+      directLinkText: 'Прямая ссылка для подтверждения:',
       security: 'Если вы не регистрировались на нашем сервисе, просто проигнорируйте это письмо.',
     },
   }
@@ -218,15 +255,25 @@ export async function sendVerificationEmail(
     t.title,
     `
       <p>${t.intro}</p>
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${verifyUrl}" class="btn-action">
+          ${t.btnText}
+        </a>
+      </div>
+      <p style="text-align: center; font-size: 12px; color: #8b8b94; margin-top: 16px;">${t.orCode}</p>
       <div class="code-box">
         <div class="code-digits">${code}</div>
       </div>
+      <p style="font-size: 11px; color: #56565e; word-break: break-all;">
+        ${t.directLinkText} <a href="${verifyUrl}" style="color: #a0a0b0;">${verifyUrl}</a>
+      </p>
       <p style="font-size: 11px; color: #56565e;">${t.security}</p>
     `,
-    'Automated notification. Please do not reply directly to this message.'
+    'Automated notification. Please do not reply directly to this message.',
+    appUrl
   )
 
-  const text = `${t.title}\n\n${t.intro}\n\nVERIFICATION CODE: ${code}\n\n${t.security}`
+  const text = `${t.title}\n\n${t.intro}\n\nVERIFICATION CODE: ${code}\n\nDIRECT LINK: ${verifyUrl}\n\n${t.security}`
 
   return sendEmail({ to, subject: t.subject, html, text })
 }
@@ -234,26 +281,41 @@ export async function sendVerificationEmail(
 export async function sendPasswordResetEmail(
   to: string,
   code: string,
-  locale: EmailLocale = 'en'
+  locale: EmailLocale = 'en',
+  resetToken?: string
 ) {
+  const appUrl = getBaseUrl()
+  const resetUrl = resetToken
+    ? `${appUrl}/auth/reset-password?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(to)}`
+    : `${appUrl}/auth/reset-password?email=${encodeURIComponent(to)}`
+
   const translations = {
     en: {
-      subject: 'Password Reset Code - Orven Media',
+      subject: 'Password Reset - Orven Media',
       title: 'Reset Your Password',
-      intro: 'A password reset was requested for your Orven Media account. Use the following 6-digit code to authorize the change. Valid for 10 minutes.',
-      warning: 'Never share this code with anyone. If you did not request a password reset, change your credentials immediately.',
+      intro: 'A password reset was requested for your Orven Media account. Click the button below to set a new password, or use the 6-digit verification code. Valid for 10 minutes.',
+      btnText: 'RESET YOUR PASSWORD',
+      orCode: 'Or enter this 6-digit code on the reset page:',
+      directLinkText: 'Direct reset link:',
+      warning: 'Never share this code or link with anyone. If you did not request a password reset, change your credentials immediately.',
     },
     uz: {
-      subject: 'Parolni Tiklash Kodi - Orven Media',
+      subject: 'Parolni Tiklash - Orven Media',
       title: 'Parolingizni Qayta Oʻrnatish',
-      intro: 'Orven Media akkauntingiz uchun parolni tiklash soʻrovi yuborildi. Oʻzgarishni tasdiqlash uchun quyidagi 6 xonali koddan foydalaning. Amal qilish muddati: 10 daqiqa.',
-      warning: 'Ushbu kodni hech kimga bermang. Agar parolni tiklashni soʻramagan boʻlsangiz, zudlik bilan akkauntingizni tekshiring.',
+      intro: 'Orven Media akkauntingiz uchun parolni tiklash soʻrovi yuborildi. Yangi parol oʻrnatish uchun quyidagi tugmani bosing yoki 6 xonali tasdiqlash kodidan foydalaning. Amal qilish muddati: 10 daqiqa.',
+      btnText: 'PAROLNI TIKLASH',
+      orCode: 'Yoki parolni tiklash sahifasida 6 xonali kodni kiriting:',
+      directLinkText: 'Toʻgʻridan-toʻgʻri tiklash havolasi:',
+      warning: 'Ushbu kod va havolani hech kimga bermang. Agar parolni tiklashni soʻramagan boʻlsangiz, zudlik bilan akkauntingizni tekshiring.',
     },
     ru: {
       subject: 'Сброс Пароля - Orven Media',
       title: 'Восстановление Пароля',
-      intro: 'Для вашего аккаунта Orven Media был запрошен сброс пароля. Используйте следующий 6-значный код. Действителен 10 минут.',
-      warning: 'Никому не сообщайте этот код. Если вы не запрашивали сброс, рекомендуем срочно сменить пароль.',
+      intro: 'Для вашего аккаунта Orven Media был запрошен сброс пароля. Нажмите кнопку ниже для установки нового пароля или используйте 6-значный проверочный код. Действителен 10 минут.',
+      btnText: 'СБРОСИТЬ ПАРОЛЬ',
+      orCode: 'Или введите 6-значный код на странице восстановления:',
+      directLinkText: 'Прямая ссылка для сброса:',
+      warning: 'Никому не сообщайте этот код или ссылку. Если вы не запрашивали сброс, рекомендуем срочно сменить пароль.',
     },
   }
 
@@ -263,15 +325,25 @@ export async function sendPasswordResetEmail(
     t.title,
     `
       <p>${t.intro}</p>
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${resetUrl}" class="btn-action">
+          ${t.btnText}
+        </a>
+      </div>
+      <p style="text-align: center; font-size: 12px; color: #8b8b94; margin-top: 16px;">${t.orCode}</p>
       <div class="code-box">
         <div class="code-digits">${code}</div>
       </div>
+      <p style="font-size: 11px; color: #56565e; word-break: break-all;">
+        ${t.directLinkText} <a href="${resetUrl}" style="color: #a0a0b0;">${resetUrl}</a>
+      </p>
       <p style="font-size: 11px; color: #c43c3c;">${t.warning}</p>
     `,
-    'Automated security transmission from Orven Media security gateway.'
+    'Automated security transmission from Orven Media security gateway.',
+    appUrl
   )
 
-  const text = `${t.title}\n\n${t.intro}\n\nRESET CODE: ${code}\n\n${t.warning}`
+  const text = `${t.title}\n\n${t.intro}\n\nRESET LINK: ${resetUrl}\n\nRESET CODE: ${code}\n\n${t.warning}`
 
   return sendEmail({ to, subject: t.subject, html, text })
 }
@@ -281,6 +353,8 @@ export async function sendEmailChangeCode(
   code: string,
   locale: EmailLocale = 'en'
 ) {
+  const appUrl = getBaseUrl()
+
   const translations = {
     en: {
       subject: 'Confirm Email Address Change - Orven Media',
@@ -313,7 +387,8 @@ export async function sendEmailChangeCode(
       </div>
       <p style="font-size: 11px; color: #56565e;">${t.security}</p>
     `,
-    'Automated security dispatch from Orven Media.'
+    'Automated security dispatch from Orven Media.',
+    appUrl
   )
 
   const text = `${t.title}\n\n${t.intro}\n\nCONFIRMATION CODE: ${code}\n\n${t.security}`
@@ -326,6 +401,9 @@ export async function sendWelcomeEmail(
   username: string,
   locale: EmailLocale = 'en'
 ) {
+  const appUrl = getBaseUrl()
+  const streamUrl = `${appUrl}/browse`
+
   const translations = {
     en: {
       subject: 'Welcome to Orven Media',
@@ -351,15 +429,16 @@ export async function sendWelcomeEmail(
     `
       <p>${t.body}</p>
       <div style="text-align: center; margin: 28px 0;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}" style="background: #a0a0b0; color: #0b0b0d; padding: 10px 24px; text-decoration: none; font-weight: 700; font-size: 13px; letter-spacing: 0.5px; border-radius: 1px; display: inline-block;">
+        <a href="${streamUrl}" class="btn-action">
           START STREAMING
         </a>
       </div>
     `,
-    'Thank you for being part of the Orven Media community.'
+    'Thank you for being part of the Orven Media community.',
+    appUrl
   )
 
-  const text = `${t.title}\n\n${t.body}\n\nStart streaming now: ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}`
+  const text = `${t.title}\n\n${t.body}\n\nStart streaming now: ${streamUrl}`
 
   return sendEmail({ to, subject: t.subject, html, text })
 }

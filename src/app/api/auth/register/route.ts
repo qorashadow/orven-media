@@ -85,16 +85,9 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcryptjs.hash(password, 10)
 
-    // Role assignment: first user becomes ADMIN, others USER
-    const verifiedUserCount = await db.user.count({
-      where: {
-        OR: [
-          { emailVerified: { not: null } },
-          { role: { in: ['ADMIN', 'MODERATOR'] } },
-        ],
-      },
-    })
-    const role = verifiedUserCount === 0 ? 'ADMIN' : 'USER'
+    // Registered users are always given the 'USER' role for security.
+    // Admin access must only be assigned explicitly through database seeding or existing admins.
+    const role = 'USER'
 
     const user = await db.user.create({
       data: {
@@ -153,6 +146,7 @@ export async function POST(req: Request) {
         requireVerification: true,
         email: user.email,
         username: user.username,
+        devCode: mailResult.devMode ? code : undefined,
       },
       { status: 201 }
     )

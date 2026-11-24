@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next'
+import { getBaseUrl } from '@/lib/utils'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXTAUTH_URL || 'https://orven.media'
+  const baseUrl = getBaseUrl()
 
   return {
     rules: [

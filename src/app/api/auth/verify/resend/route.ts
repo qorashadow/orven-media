@@ -73,7 +73,11 @@ export async function POST(req: Request) {
       )
     }
 
-    return NextResponse.json({ success: true, message: 'Verification code resent successfully' })
+    return NextResponse.json({
+      success: true,
+      message: 'Verification code resent successfully',
+      devCode: mailResult.devMode ? code : undefined,
+    })
   } catch (err) {
     console.error('Resend error:', err)
     return NextResponse.json({ error: 'Failed to resend code' }, { status: 500 })

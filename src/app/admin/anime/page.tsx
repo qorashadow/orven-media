@@ -21,8 +21,8 @@ export default async function AdminAnimePage({ searchParams }: AdminAnimePagePro
   const where: any = {}
   if (q.trim()) {
     where.OR = [
-      { title: { contains: q.trim() } },
-      { titleEnglish: { contains: q.trim() } },
+      { title: { contains: q.trim(), mode: 'insensitive' } },
+      { titleEnglish: { contains: q.trim(), mode: 'insensitive' } },
     ]
   }
 

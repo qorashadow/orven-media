@@ -41,10 +41,10 @@ export async function GET(req: Request) {
 
     if (q) {
       where.OR = [
-        { title: { contains: q } },
-        { titleEnglish: { contains: q } },
-        { titleRomaji: { contains: q } },
-        { titleNative: { contains: q } },
+        { title: { contains: q, mode: 'insensitive' } },
+        { titleEnglish: { contains: q, mode: 'insensitive' } },
+        { titleRomaji: { contains: q, mode: 'insensitive' } },
+        { titleNative: { contains: q, mode: 'insensitive' } },
       ]
     }
 

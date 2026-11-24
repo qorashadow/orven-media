@@ -46,9 +46,9 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   if (params.q) {
     where.OR = [
-      { title: { contains: params.q } },
-      { titleEnglish: { contains: params.q } },
-      { titleRomaji: { contains: params.q } },
+      { title: { contains: params.q, mode: 'insensitive' } },
+      { titleEnglish: { contains: params.q, mode: 'insensitive' } },
+      { titleRomaji: { contains: params.q, mode: 'insensitive' } },
     ]
   }
 

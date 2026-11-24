@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Mail, Lock, User as UserIcon, UserPlus, ShieldCheck, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -29,8 +29,26 @@ export default function RegisterPage() {
   const [canResend, setCanResend] = useState(false)
 
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { success, error } = useToast()
   const { t, locale } = useI18n()
+
+  // Handle direct verification link params (?email=...&code=...&step=verify)
+  useEffect(() => {
+    const urlEmail = searchParams.get('email')
+    const urlCode = searchParams.get('code')
+    const urlStep = searchParams.get('step')
+
+    if (urlEmail) {
+      setEmail(urlEmail)
+    }
+    if (urlCode) {
+      setVerifyCode(urlCode)
+    }
+    if (urlStep === 'verify' || urlCode) {
+      setStep('verify')
+    }
+  }, [searchParams])
 
   // Cooldown countdown
   useEffect(() => {
@@ -86,7 +104,12 @@ export default function RegisterPage() {
         setErrorMsg(data.error || 'Failed to create account')
         error(data.error || 'Failed to create account')
       } else {
-        success('Verification code dispatched to your email!')
+        if (data.devCode) {
+          success(`Verification code dispatched! (Demo code: ${data.devCode})`)
+          setVerifyCode(data.devCode)
+        } else {
+          success('Verification code dispatched to your email!')
+        }
         setStep('verify')
         setResendCooldown(60)
       }
@@ -119,20 +142,23 @@ export default function RegisterPage() {
         setErrorMsg(data.error || 'Verification failed')
         error(data.error || 'Verification failed')
       } else {
-        success(t('auth.account_verified'))
-        // Auto-login after successful verification
-        const loginRes = await signIn('credentials', {
-          redirect: false,
-          email,
-          password,
-        })
+        success(t('auth.account_verified') || 'Account verified successfully!')
+        try {
+          const loginRes = await signIn('credentials', {
+            redirect: false,
+            email,
+            password,
+          })
 
-        if (loginRes?.ok) {
-          router.push('/')
-          router.refresh()
-        } else {
-          router.push('/auth/login')
+          if (loginRes?.ok) {
+            router.push('/')
+            router.refresh()
+            return
+          }
+        } catch (loginErr) {
+          console.error('Auto-login error:', loginErr)
         }
+        router.push('/auth/login?verified=true')
       }
     } catch {
       setErrorMsg('Failed to verify code')
@@ -154,7 +180,12 @@ export default function RegisterPage() {
 
       const data = await res.json()
       if (res.ok) {
-        success(t('auth.code_resent'))
+        if (data.devCode) {
+          success(`Code resent! (Demo code: ${data.devCode})`)
+          setVerifyCode(data.devCode)
+        } else {
+          success(t('auth.code_resent') || 'Verification code resent!')
+        }
         setResendCooldown(60)
         setCanResend(false)
       } else {

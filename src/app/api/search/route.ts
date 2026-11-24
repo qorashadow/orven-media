@@ -15,10 +15,10 @@ export async function GET(req: Request) {
 
     const where = {
       OR: [
-        { title: { contains: q } },
-        { titleEnglish: { contains: q } },
-        { titleRomaji: { contains: q } },
-        { titleNative: { contains: q } },
+        { title: { contains: q, mode: 'insensitive' as const } },
+        { titleEnglish: { contains: q, mode: 'insensitive' as const } },
+        { titleRomaji: { contains: q, mode: 'insensitive' as const } },
+        { titleNative: { contains: q, mode: 'insensitive' as const } },
       ],
     }
 

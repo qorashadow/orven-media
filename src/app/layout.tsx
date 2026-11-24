@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth'
 import { ToastProvider } from '@/components/ui/Toast'
 import { I18nProvider } from '@/context/I18nContext'
 import { getServerLocale } from '@/lib/i18n'
+import { getBaseUrl } from '@/lib/utils'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
     'stream anime',
   ],
   authors: [{ name: 'Orven Media Team' }],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(getBaseUrl()),
   openGraph: {
     title: 'Orven Media - Watch Anime & Donghua Online',
     description: 'High-speed anime & donghua streaming with multi-language subtitles.',

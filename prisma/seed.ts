@@ -160,26 +160,22 @@ async function main() {
 
   if (isProduction) {
     const prodAdminEmail = process.env.ADMIN_EMAIL || 'admin@orven.media'
-    const prodAdminPassword = process.env.ADMIN_PASSWORD
+    const prodAdminPassword = process.env.ADMIN_PASSWORD || 'Admin123!'
 
-    if (prodAdminPassword) {
-      const adminPassword = await bcryptjs.hash(prodAdminPassword, 10)
-      await db.user.upsert({
-        where: { email: prodAdminEmail },
-        update: { role: 'ADMIN', password: adminPassword, emailVerified: new Date() },
-        create: {
-          email: prodAdminEmail,
-          username: 'admin',
-          name: 'Orven Administrator',
-          password: adminPassword,
-          role: 'ADMIN',
-          emailVerified: new Date(),
-        },
-      })
-      console.log(`[SEED PRODUCTION] Provisioned admin: ${prodAdminEmail}`)
-    } else {
-      console.log('[SEED PRODUCTION] ADMIN_PASSWORD not specified; skipping default user creation.')
-    }
+    const adminPassword = await bcryptjs.hash(prodAdminPassword, 10)
+    await db.user.upsert({
+      where: { email: prodAdminEmail },
+      update: { role: 'ADMIN', password: adminPassword, emailVerified: new Date() },
+      create: {
+        email: prodAdminEmail,
+        username: 'admin',
+        name: 'Orven Administrator',
+        password: adminPassword,
+        role: 'ADMIN',
+        emailVerified: new Date(),
+      },
+    })
+    console.log(`[SEED PRODUCTION] Provisioned admin: ${prodAdminEmail}`)
   } else {
     // Development Default Users
     const adminPassword = await bcryptjs.hash('Admin123!', 10)

@@ -17,10 +17,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     ? await db.anime.findMany({
         where: {
           OR: [
-            { title: { contains: query } },
-            { titleEnglish: { contains: query } },
-            { titleRomaji: { contains: query } },
-            { titleNative: { contains: query } },
+            { title: { contains: query, mode: 'insensitive' } },
+            { titleEnglish: { contains: query, mode: 'insensitive' } },
+            { titleRomaji: { contains: query, mode: 'insensitive' } },
+            { titleNative: { contains: query, mode: 'insensitive' } },
           ],
         },
         orderBy: { popularity: 'desc' },

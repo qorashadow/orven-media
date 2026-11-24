@@ -13,9 +13,9 @@ export async function GET(req: Request) {
     const matches = await db.anime.findMany({
       where: {
         OR: [
-          { title: { contains: q } },
-          { titleEnglish: { contains: q } },
-          { titleRomaji: { contains: q } },
+          { title: { contains: q, mode: 'insensitive' } },
+          { titleEnglish: { contains: q, mode: 'insensitive' } },
+          { titleRomaji: { contains: q, mode: 'insensitive' } },
         ],
       },
       take: 6,

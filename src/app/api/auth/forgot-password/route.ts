@@ -48,8 +48,8 @@ export async function POST(req: Request) {
         },
       })
 
-      // 3. Dispatch reset email
-      await sendPasswordResetEmail(normalizedEmail, code, locale)
+      // 3. Dispatch reset email with both code and direct one-time token link
+      await sendPasswordResetEmail(normalizedEmail, code, locale, linkToken)
     }
 
     // Always return success to protect user privacy (no email enumeration)

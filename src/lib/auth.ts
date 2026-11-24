@@ -8,8 +8,33 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import bcryptjs from 'bcryptjs'
 import { db } from './db'
 
+// Production & Vercel compatibility: harmonize secret and URL environment variables
+const resolvedSecret =
+  process.env.AUTH_SECRET ||
+  process.env.NEXTAUTH_SECRET ||
+  'orven-media-production-auth-secret-key-fallback-32b'
+
+if (!process.env.AUTH_SECRET) {
+  process.env.AUTH_SECRET = resolvedSecret
+}
+if (!process.env.NEXTAUTH_SECRET) {
+  process.env.NEXTAUTH_SECRET = resolvedSecret
+}
+if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
+  process.env.AUTH_URL = process.env.NEXTAUTH_URL
+}
+if (!process.env.NEXTAUTH_URL && process.env.AUTH_URL) {
+  process.env.NEXTAUTH_URL = process.env.AUTH_URL
+}
+if (!process.env.AUTH_URL && !process.env.NEXTAUTH_URL && process.env.NODE_ENV === 'production') {
+  process.env.AUTH_URL = 'https://orven-media.vercel.app'
+  process.env.NEXTAUTH_URL = 'https://orven-media.vercel.app'
+}
+
 export const authConfig: NextAuthConfig = {
   adapter: PrismaAdapter(db),
+  secret: resolvedSecret,
+  trustHost: true,
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -67,7 +92,9 @@ export const authConfig: NextAuthConfig = {
           email: user.email,
           name: user.name || user.username,
           image: user.avatar,
-        }
+          role: user.role,
+          username: user.username,
+        } as any
       },
     }),
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
@@ -101,6 +128,11 @@ export const authConfig: NextAuthConfig = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
+        if (user.id) token.id = user.id
+        token.role = (user as any).role || 'USER'
+        token.username = (user as any).username || ''
+        token.avatar = (user as any).image || null
+
         const dbUser = await db.user.findUnique({
           where: { email: user.email! },
           select: {
@@ -112,7 +144,8 @@ export const authConfig: NextAuthConfig = {
             emailVerified: true,
             language: true,
           },
-        })
+        }).catch(() => null)
+
         if (dbUser) {
           token.id = dbUser.id
           token.username = dbUser.username
@@ -154,7 +187,7 @@ export const authConfig: NextAuthConfig = {
         })
 
         if (!existingUser) {
-          // Clean username generation
+          // Clean username generation for OAuth users
           const baseName = (user.name || email.split('@')[0])
             .toLowerCase()
             .replace(/[^a-zA-Z0-9_-]/g, '')
@@ -164,11 +197,11 @@ export const authConfig: NextAuthConfig = {
           await db.user.create({
             data: {
               email,
-              emailVerified: new Date(), // OAuth emails are verified
+              emailVerified: new Date(), // OAuth emails are pre-verified
               username,
               name: user.name || username,
               avatar: user.image,
-              role: 'USER',
+              role: 'USER', // Always regular USER by default
             },
           })
         } else {
@@ -202,7 +235,6 @@ export const authConfig: NextAuthConfig = {
       }
     },
   },
-  trustHost: true,
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig)

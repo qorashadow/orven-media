@@ -68,10 +68,56 @@ export function truncateText(text: string, maxLength: number): string {
   return text.substring(0, maxLength).trim() + '...'
 }
 
+export function getBaseUrl(): string {
+  // 1. Explicit public app URL if defined and not localhost
+  const publicUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (publicUrl && !publicUrl.includes('localhost')) {
+    return publicUrl.replace(/\/+$/, '')
+  }
+
+  // 2. Client-side browser origin
+  if (typeof window !== 'undefined' && window.location.origin) {
+    return window.location.origin
+  }
+
+  // 3. NextAuth or Auth URL if not localhost
+  const authUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL
+  if (authUrl && !authUrl.includes('localhost')) {
+    return authUrl.replace(/\/+$/, '')
+  }
+
+  // 4. Vercel deployment URLs (provided automatically in Vercel environment)
+  const vercelProjectUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  if (vercelProjectUrl) {
+    return `https://${vercelProjectUrl.replace(/\/+$/, '')}`
+  }
+  const vercelUrl = process.env.VERCEL_URL
+  if (vercelUrl) {
+    return `https://${vercelUrl.replace(/\/+$/, '')}`
+  }
+
+  // 5. Use publicUrl or authUrl even if localhost (for local development)
+  if (publicUrl) {
+    return publicUrl.replace(/\/+$/, '')
+  }
+  if (authUrl) {
+    return authUrl.replace(/\/+$/, '')
+  }
+
+  // 6. Production fallback default (never return localhost in production)
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://orven-media.vercel.app'
+  }
+
+  // 7. Local development fallback
+  return 'http://localhost:3000'
+}
+
 export function getImageUrl(path: string | null | undefined): string {
   if (!path) return '/placeholder.jpg'
   if (path.startsWith('http')) return path
-  return `${process.env.NEXT_PUBLIC_APP_URL || ''}/uploads/${path}`
+  const cleanPath = path.startsWith('/') ? path : `/${path}`
+  return cleanPath
 }
 
 export function debounce<T extends (...args: any[]) => any>(

@@ -2,8 +2,10 @@ import React from 'react'
 import { Settings as SettingsIcon } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { getBaseUrl } from '@/lib/utils'
 
 export default function AdminSettingsPage() {
+  const appUrl = getBaseUrl()
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-6">
       <div className="pb-4 border-b border-[#26262c]">
@@ -17,7 +19,7 @@ export default function AdminSettingsPage() {
 
       <div className="p-6 bg-[#111114] border border-[#26262c] rounded-[2px] flex flex-col gap-4">
         <Input label="Site Name" defaultValue="Orven Media" disabled />
-        <Input label="App URL" defaultValue="http://localhost:3000" disabled />
+        <Input label="App URL" defaultValue={appUrl} disabled />
         <Input label="Storage Directory" defaultValue="./uploads" disabled />
         <Input label="Max Video Upload Size" defaultValue="500 MB" disabled />
 

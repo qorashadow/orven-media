@@ -23,6 +23,12 @@ export default function LoginPage() {
   const { success, error } = useToast()
   const { t } = useI18n()
 
+  React.useEffect(() => {
+    if (searchParams.get('verified') === 'true') {
+      success(t('auth.account_verified') || 'Account verified! Please sign in.')
+    }
+  }, [searchParams, success, t])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMsg('')
@@ -37,9 +43,19 @@ export default function LoginPage() {
       })
 
       if (res?.error) {
-        const msg = res.error === 'Your account has been banned.' || res.error === 'Please verify your email address before logging in.'
-          ? (res.error === 'Please verify your email address before logging in.' ? (t('auth.email_not_verified') || res.error) : res.error)
-          : 'Invalid email/username or password'
+        let msg = 'Invalid email/username or password'
+        if (res.error === 'Your account has been banned.') {
+          msg = res.error
+        } else if (
+          res.error === 'Please verify your email address before logging in.' ||
+          res.error.includes('Please verify your email address')
+        ) {
+          msg = t('auth.email_not_verified') || 'Please verify your email address before logging in.'
+        } else if (res.error === 'CredentialsSignin') {
+          msg = 'Invalid email/username or password'
+        } else if (res.error === 'Configuration') {
+          msg = 'Server authentication error. Please contact administrator.'
+        }
         setErrorMsg(msg)
         error(msg)
       } else {
@@ -47,8 +63,10 @@ export default function LoginPage() {
         router.push(callbackUrl)
         router.refresh()
       }
-    } catch {
-      setErrorMsg('An unexpected error occurred. Please try again.')
+    } catch (err: any) {
+      const msg = err?.message || 'An unexpected error occurred. Please try again.'
+      setErrorMsg(msg)
+      error(msg)
     } finally {
       setLoading(false)
     }

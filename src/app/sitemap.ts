@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next'
 import { db } from '@/lib/db'
+import { getBaseUrl } from '@/lib/utils'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXTAUTH_URL || 'https://orven.media'
+  const baseUrl = getBaseUrl()
 
   // Static routes
   const staticRoutes: MetadataRoute.Sitemap = [
